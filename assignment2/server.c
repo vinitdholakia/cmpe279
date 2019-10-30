@@ -18,12 +18,25 @@ pid_t child_pid;
 void messageExchange(){
     //accept new connection and then fork new process
     if ((new_socket = accept(server_fd, (struct sockaddr *)&address,(socklen_t*)&addrlen))<0) 
-    { 
+    {
         perror("accept"); 
         exit(EXIT_FAILURE); 
     }
     child_pid = fork();
     if(child_pid == 0 ){
+        char str[12];
+        sprintf(str, "%d", new_socket);
+        char * ls_args[] = { "./server" , "child_true", str, NULL};
+        // printf("%s\n", ls_args[1]);
+        execvp(ls_args[0], ls_args);
+    }
+    if(child_pid<0){
+        perror("accept"); 
+        exit(EXIT_FAILURE); 
+    }
+    
+}
+void childProcess(int new_socket){
 		setuid(getuid());	//dropping privileges
 		if(setuid(-1) == 0)
 		{
@@ -34,11 +47,6 @@ void messageExchange(){
         printf("%s\n",buffer ); 
         send(new_socket , hello , strlen(hello) , 0 ); 
         printf("Hello message sent\n");
-    }
-    if(child_pid<0){
-        perror("accept"); 
-        exit(EXIT_FAILURE); 
-    }
 }
 
 //establishing socket connection
@@ -49,7 +57,6 @@ void socketConnection(){
         perror("socket failed"); 
         exit(EXIT_FAILURE); 
     } 
-
     // Forcefully attaching socket to the port 8080 
     if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, 
       &opt, sizeof(opt))) 
@@ -65,9 +72,9 @@ void socketConnection(){
     if (bind(server_fd, (struct sockaddr *)&address,  
        sizeof(address))<0) 
     { 
-        perror("bind failed"); 
+        perror("bind failed");
         exit(EXIT_FAILURE); 
-    } 
+    }
     if (listen(server_fd, 3) < 0) 
     { 
         perror("listen"); 
@@ -75,8 +82,15 @@ void socketConnection(){
     }
 }
 int main(int argc, char const *argv[]) 
-{ 
-   socketConnection();
-   messageExchange();
+{
+    if(!argv[1]){
+        socketConnection();
+        messageExchange();
+    }
+    else{
+        int new_socket_val;
+        new_socket_val = atoi(argv[2]);
+        childProcess(new_socket_val);
+    }
    return 0;
 }
