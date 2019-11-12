@@ -5,9 +5,10 @@
 #include <stdlib.h> 
 #include <netinet/in.h> 
 #include <string.h> 
-#define PORT 8080  // defines default port
+//#define PORT 8080  // defines default port
 #define MAXCHAR 1000
 
+int PORT;
 int server_fd, new_socket, valread; 
 struct sockaddr_in address; 
 int opt = 1; 
@@ -26,8 +27,9 @@ void messageExchange(char *filepath){
     if(child_pid == 0 ){
         char str[12];
         sprintf(str, "%d", new_socket);
-        char * ls_args[] = { "./server" , str, NULL};
-        // printf("%s\n", ls_args[1]);
+        char portStr[12];
+        sprintf(portStr, "%d", PORT);
+        char * ls_args[] = { "./server" ,portStr, filepath ,str, NULL};
         execvp(ls_args[0], ls_args);
     }
     if(child_pid<0){
@@ -37,29 +39,26 @@ void messageExchange(char *filepath){
     
 }
 void childProcess(char *filename, int new_socket){
-		setuid(getuid());	//dropping privileges
+        setuid(getuid());	//dropping privileges
 		if(setuid(-1) == 0)
 		{
 			exit(EXIT_FAILURE);
 		}
         //exchange of messages
         valread = read( new_socket , buffer, 1024); 
-        printf("%s\n",buffer ); 
-        char *messageToSend = "hello from server ";// read file
+        printf("%s\n",buffer );
+        FILE *fp;
+        char str[MAXCHAR];
 
-    FILE *fp;
-    char str[MAXCHAR];
- 
-    fp = fopen(filename, "r");
-    if (fp == NULL){
-        printf("Could not open file %s",filename);
-    }
-    while (fgets(str, MAXCHAR, fp) != NULL)
-        // printf("%s", str);
-    fclose(fp);
-
+        fp = fopen(filename, "r");
+        if (fp == NULL){
+            printf("Could not open file %s",filename);
+        }
+        while (fgets(str, MAXCHAR, fp) != NULL)
+            printf("%s", str);
+        fclose(fp);
         send(new_socket , str , strlen(str) , 0 ); 
-        printf("Hello message sent\n");
+        printf("Message sent\n");
 }
 
 //establishing socket connection
@@ -96,16 +95,16 @@ void socketConnection(){
 }
 int main(int argc, char const *argv[]) 
 {
-    // PORT = argv[1];
-    char *filepath = "./sample.txt";
+    PORT = atoi(argv[1]);
+    char *filepath = argv[2];
     // argv[3] indicates if its a child Process
-    if(!argv[1]){
+    if(!argv[3]){
         socketConnection();
         messageExchange(filepath);
     }
     else{
         int new_socket_val;
-        new_socket_val = atoi(argv[1]);
+        new_socket_val = atoi(argv[3]);
         childProcess(filepath, new_socket_val);
     }
    return 0;
