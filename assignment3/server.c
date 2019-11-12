@@ -6,6 +6,7 @@
 #include <netinet/in.h> 
 #include <string.h> 
 #define PORT 8080  // defines default port
+#define MAXCHAR 1000
 
 int server_fd, new_socket, valread; 
 struct sockaddr_in address; 
@@ -25,7 +26,7 @@ void messageExchange(char *filepath){
     if(child_pid == 0 ){
         char str[12];
         sprintf(str, "%d", new_socket);
-        char * ls_args[] = { "./server" , PORT, filepath, str, NULL};
+        char * ls_args[] = { "./server" , str, NULL};
         // printf("%s\n", ls_args[1]);
         execvp(ls_args[0], ls_args);
     }
@@ -35,7 +36,7 @@ void messageExchange(char *filepath){
     }
     
 }
-void childProcess(char *filepath, int new_socket){
+void childProcess(char *filename, int new_socket){
 		setuid(getuid());	//dropping privileges
 		if(setuid(-1) == 0)
 		{
@@ -44,8 +45,20 @@ void childProcess(char *filepath, int new_socket){
         //exchange of messages
         valread = read( new_socket , buffer, 1024); 
         printf("%s\n",buffer ); 
-        char *messageToSend = "hello from server "// read file
-        send(new_socket , hello , strlen(hello) , 0 ); 
+        char *messageToSend = "hello from server ";// read file
+
+    FILE *fp;
+    char str[MAXCHAR];
+ 
+    fp = fopen(filename, "r");
+    if (fp == NULL){
+        printf("Could not open file %s",filename);
+    }
+    while (fgets(str, MAXCHAR, fp) != NULL)
+        // printf("%s", str);
+    fclose(fp);
+
+        send(new_socket , str , strlen(str) , 0 ); 
         printf("Hello message sent\n");
 }
 
@@ -83,16 +96,16 @@ void socketConnection(){
 }
 int main(int argc, char const *argv[]) 
 {
-    PORT = argv[1];
-    char *filepath = argv[2];
+    // PORT = argv[1];
+    char *filepath = "./sample.txt";
     // argv[3] indicates if its a child Process
-    if(!argv[3]){
+    if(!argv[1]){
         socketConnection();
         messageExchange(filepath);
     }
     else{
         int new_socket_val;
-        new_socket_val = atoi(argv[3]);
+        new_socket_val = atoi(argv[1]);
         childProcess(filepath, new_socket_val);
     }
    return 0;
