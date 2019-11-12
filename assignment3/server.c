@@ -5,17 +5,16 @@
 #include <stdlib.h> 
 #include <netinet/in.h> 
 #include <string.h> 
-#define PORT 8080 
+#define PORT 8080  // defines default port
 
 int server_fd, new_socket, valread; 
 struct sockaddr_in address; 
 int opt = 1; 
 int addrlen = sizeof(address); 
 char buffer[1024] = {0}; 
-char *hello = "Hello from server"; 
 pid_t child_pid;
 
-void messageExchange(){
+void messageExchange(char *filepath){
     //accept new connection and then fork new process
     if ((new_socket = accept(server_fd, (struct sockaddr *)&address,(socklen_t*)&addrlen))<0) 
     {
@@ -26,7 +25,7 @@ void messageExchange(){
     if(child_pid == 0 ){
         char str[12];
         sprintf(str, "%d", new_socket);
-        char * ls_args[] = { "./server" , "child_true", str, NULL};
+        char * ls_args[] = { "./server" , PORT, filepath, str, NULL};
         // printf("%s\n", ls_args[1]);
         execvp(ls_args[0], ls_args);
     }
@@ -36,7 +35,7 @@ void messageExchange(){
     }
     
 }
-void childProcess(int new_socket){
+void childProcess(char *filepath, int new_socket){
 		setuid(getuid());	//dropping privileges
 		if(setuid(-1) == 0)
 		{
@@ -45,6 +44,7 @@ void childProcess(int new_socket){
         //exchange of messages
         valread = read( new_socket , buffer, 1024); 
         printf("%s\n",buffer ); 
+        char *messageToSend = "hello from server "// read file
         send(new_socket , hello , strlen(hello) , 0 ); 
         printf("Hello message sent\n");
 }
@@ -83,14 +83,17 @@ void socketConnection(){
 }
 int main(int argc, char const *argv[]) 
 {
-    if(!argv[1]){
+    PORT = argv[1];
+    char *filepath = argv[2];
+    // argv[3] indicates if its a child Process
+    if(!argv[3]){
         socketConnection();
-        messageExchange();
+        messageExchange(filepath);
     }
     else{
         int new_socket_val;
-        new_socket_val = atoi(argv[2]);
-        childProcess(new_socket_val);
+        new_socket_val = atoi(argv[3]);
+        childProcess(filepath, new_socket_val);
     }
    return 0;
 }
