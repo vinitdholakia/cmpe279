@@ -6,7 +6,7 @@
 #include <netinet/in.h> 
 #include <string.h> 
 //#define PORT 8080  // defines default port
-#define MAXCHAR 1000
+#define MAXCHAR 1024
 
 int PORT;
 int server_fd, new_socket, valread; 
@@ -30,6 +30,8 @@ void messageExchange(char *filepath){
         char portStr[12];
         sprintf(portStr, "%d", PORT);
         char * ls_args[] = { "./server" ,portStr, filepath ,str, NULL};
+        printf("\n re-executing \n");
+        chroot(filepath);
         execvp(ls_args[0], ls_args);
     }
     if(child_pid<0){
@@ -49,10 +51,9 @@ void childProcess(char *filename, int new_socket){
         printf("%s\n",buffer );
         FILE *fp;
         char str[MAXCHAR];
-
-        fp = fopen(filename, "r");
+        fp = fopen("sample.txt", "r");
         if (fp == NULL){
-            printf("Could not open file %s",filename);
+            printf("Could not open file %s");
         }
         while (fgets(str, MAXCHAR, fp) != NULL)
             printf("%s", str);
