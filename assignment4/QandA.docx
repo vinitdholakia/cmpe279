@@ -1,5 +1,7 @@
-Which capabilities API (seccomp-bpf, AppArmor, or SELinux) did you choose? Why did you
-make that choice?
+1) Which capabilities API (seccomp-bpf, AppArmor, or SELinux) did you choose? Why did you make that choice?
+    we decided to choose seccomp-bpf. To limit system calls for the code to run which are actually required. 
+    For that I used seccomp.h library.
+
 2. What was the process you used to ascertain the list of system calls required by each program?
     
     A) Since we are usinf macOS, we had to call dtruss command to retrieve all the system calls by each program
@@ -44,3 +46,5 @@ make that choice?
 
 4. What happens when your application calls the prohibited system call? What is the application
 behaviour that results from the call?
+
+    A) The process is terminated and a Bad System Call mesaage is displayed.
