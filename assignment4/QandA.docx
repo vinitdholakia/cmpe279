@@ -1,0 +1,46 @@
+Which capabilities API (seccomp-bpf, AppArmor, or SELinux) did you choose? Why did you
+make that choice?
+2. What was the process you used to ascertain the list of system calls required by each program?
+    
+    A) Since we are usinf macOS, we had to call dtruss command to retrieve all the system calls by each program
+        sudo dtruss ./server & sudo dtruss ./client
+
+3. What system calls are needed by each?
+    A) System Calls required by the Server : 
+
+        open("/dev/dtracehelper\0", 0x2, 0xFFFFFFFFE1D2B0D0)		 = 3 0
+        ioctl(0x3, 0x80086804, 0x7FFEE1D2AEE0)		 = 0 0
+        close(0x3)		 = 0 0
+        access("/AppleInternal/XBS/.isChrooted\0", 0x0, 0x0)		 = -1 Err#2
+        bsdthread_register(0x7FFF57C18400, 0x7FFF57C183F0, 0x2000)		 = 1073742047 0
+        sysctlbyname(kern.bootargs, 0xD, 0x7FFEE1D2A330, 0x7FFEE1D2A320, 0x0)		 = 0 0
+        issetugid(0x0, 0x0, 0x0)		 = 0 0
+        mprotect(0x10DEDB000, 0x1000, 0x0)		 = 0 0
+        getentropy(0x7FFEE1D29C80, 0x20, 0x0)		 = 0 0
+        getpid(0x0, 0x0, 0x0)		 = 15117 0
+        stat64("/AppleInternal\0", 0x7FFEE1D2A7A0, 0x0)		 = -1 Err#2
+        csops(0x3B0D, 0x7, 0x7FFEE1D2A2D0)		 = 0 0
+        proc_info(0x2, 0x3B0D, 0xD)		 = 64 0
+
+        System Calls required by the Client : 
+        
+        open("/dev/dtracehelper\0", 0x2, 0xFFFFFFFFE0B2A0D0)		 = 3 0
+        ioctl(0x3, 0x80086804, 0x7FFEE0B29EE0)		 = 0 0
+        close(0x3)		 = 0 0
+        access("/AppleInternal/XBS/.isChrooted\0", 0x0, 0x0)		 = -1 Err#2
+        bsdthread_register(0x7FFF57C18400, 0x7FFF57C183F0, 0x2000)		 = 1073742047 0
+        sysctlbyname(kern.bootargs, 0xD, 0x7FFEE0B29330, 0x7FFEE0B29320, 0x0)		 = 0 0
+        issetugid(0x0, 0x0, 0x0)		 = 0 0
+        mprotect(0x10F0DC000, 0x1000, 0x0)		 = 0 0
+        getentropy(0x7FFEE0B28C80, 0x20, 0x0)		 = 0 0
+        getpid(0x0, 0x0, 0x0)		 = 15736 0
+        stat64("/AppleInternal\0", 0x7FFEE0B297A0, 0x0)		 = -1 Err#2
+        csops(0x3D78, 0x7, 0x7FFEE0B292D0)		 = -1 Err#22
+        proc_info(0x2, 0x3D78, 0xD)		 = 64 0
+        socket(0x2, 0x1, 0x0)		 = 3 0
+        connect(0x3, 0x7FFEE0B2AAE8, 0x10)		 = -1 Err#61
+        getrlimit(0x1008, 0x7FFEE0B2A370, 0x0)		 = 0 0
+        fstat64(0x1, 0x7FFEE0B2A358, 0x0)		 = 0 0
+
+4. What happens when your application calls the prohibited system call? What is the application
+behaviour that results from the call?
