@@ -4,10 +4,49 @@
 #include <stdlib.h> 
 #include <netinet/in.h> 
 #include <string.h> 
+#include <seccomp.h>
+#include <linux/seccomp.h>
 #define PORT 8080 
    
 int main(int argc, char const *argv[]) 
 { 
+
+
+    scmp_filter_ctx ctx;
+    ctx = seccomp_init(SCMP_ACT_TRAP);
+
+
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(open),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(ioctl),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(close),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(access),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(bsdthread_register),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(sysctlbyname),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(issetugid),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(ioctl),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mprotect),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mprotect),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mprotect),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mprotect),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mprotect),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mprotect),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mprotect),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(mprotect),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(getentropy),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(getpid),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(stat64),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(csops),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(proc_info),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(csops),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(socket),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(connect),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(getrlimit),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(fstat64),0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(ioctl),0);
+
+
+
+    seccomp_load(ctx);
     struct sockaddr_in address; 
     int sock = 0, valread; 
     struct sockaddr_in serv_addr; 

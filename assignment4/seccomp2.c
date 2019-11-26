@@ -14,6 +14,9 @@ main(int argc, char **argv)
 
 	ctx = seccomp_init(SCMP_ACT_TRAP);
 
+	
+
+
 	seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(rt_sigreturn), 0);
 	seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit), 0);
 	seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(read), 0);
